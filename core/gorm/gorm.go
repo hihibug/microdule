@@ -5,11 +5,25 @@ import (
 	"gorm.io/gorm"
 )
 
+type (
+	DB struct {
+		Cli *gorm.DB
+	}
+
+	Gorm interface {
+		Client() *gorm.DB
+	}
+)
+
+func (db *DB) Client() *gorm.DB {
+	return db.Cli
+}
+
 // NewGorm 新建gorm
-func NewGorm(conf *Config) (*gorm.DB, error) {
+func NewGorm(conf *Config) (Gorm, error) {
 	err := conf.Validate()
 	if err != nil {
-		return &gorm.DB{}, err
+		return nil, err
 	}
 
 	var dcr gorm.Dialector
@@ -19,24 +33,26 @@ func NewGorm(conf *Config) (*gorm.DB, error) {
 		dcr = NewMysql(conf.Mysql)
 		err := conf.Mysql.Validate()
 		if err != nil {
-			return &gorm.DB{}, err
+			return nil, err
 		}
 	default:
 		dcr = NewMysql(conf.Mysql)
 		err := conf.Mysql.Validate()
 		if err != nil {
-			return &gorm.DB{}, err
+			return nil, err
 		}
 	}
 
 	db, err := gorm.Open(dcr, conf.Opt(conf.LogMode))
 	if err != nil {
-		return &gorm.DB{}, err
+		return nil, err
 	} else {
 		sqlDB, _ := db.DB()
 		sqlDB.SetMaxIdleConns(conf.MaxIdleCons)
 		sqlDB.SetMaxOpenConns(conf.MaxOpenCons)
-		return db, nil
+		return &DB{
+			db,
+		}, nil
 	}
 }
 

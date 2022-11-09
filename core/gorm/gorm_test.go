@@ -23,7 +23,7 @@ func TestNewGorm(t *testing.T) {
 	}
 
 	a := make([]map[string]interface{}, 0)
-	err = DB.Table("users").Find(&a).Error
+	err = DB.Client().Table("users").Find(&a).Error
 	if err != nil {
 		fmt.Println(err)
 	}
