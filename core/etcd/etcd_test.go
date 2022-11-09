@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var ETCD *Client
+var ETCD Etcd
 
 func init() {
 	etcd, err := NewEtcd(`{"addr":"172.16.102.109:2379,172.16.102.109:2380","password":"","time-out":5}`)
@@ -21,7 +21,7 @@ func init() {
 		return
 	}
 
-	go func(ETCD *Client) {
+	go func(ETCD Etcd) {
 		res := ETCD.WatchPrefix("/etcd_test/")
 		for i := range res {
 			for _, event := range i.Events {
@@ -30,7 +30,7 @@ func init() {
 		}
 	}(ETCD)
 
-	go func(ETCD *Client) {
+	go func(ETCD Etcd) {
 		res := ETCD.Watch("/etcd_test/1")
 		for i := range res {
 			for _, event := range i.Events {
