@@ -1,7 +1,6 @@
 package etcd
 
 import (
-	"encoding/json"
 	"errors"
 )
 
@@ -17,18 +16,14 @@ type Config struct {
 	TimeOut  int    `json:"time-out" yaml:"time-out"`
 }
 
-// DeConfig 解析配置json
-func DeConfig(conf string) (c Config, err error) {
-
-	err = json.Unmarshal([]byte(conf), &c)
-
-	if err != nil {
-		return Config{}, err
-	}
-
+func (c *Config) Validate() error {
 	if c.Addr == "" {
-		return Config{}, ErrEmptyAddr
+		return ErrEmptyAddr
 	}
 
-	return
+	if c.TimeOut == 0 {
+		c.TimeOut = 5
+	}
+
+	return nil
 }

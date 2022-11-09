@@ -24,6 +24,7 @@ type (
 		WatchPrefix(name string) (watchCh client3.WatchChan)                                     // WatchPrefix 前缀监听
 		LeaseGrant(i int) (leaseResp *client3.LeaseGrantResponse, err error)                     // LeaseGrant 租约
 		WithLease(id client3.LeaseID) client3.OpOption                                           // WithLease 租约
+		Close() error                                                                            // Close 关闭etcd
 	}
 )
 
@@ -79,21 +80,24 @@ func (c *Client) WithLease(id client3.LeaseID) client3.OpOption {
 	return client3.WithLease(id)
 }
 
+func (c *Client) Close() error {
+	return c.Cli.Close()
+}
+
 // NewEtcd 创建etcd链接
-func NewEtcd(conf string) (Etcd, error) {
+func NewEtcd(conf *Config) (Etcd, error) {
 
-	configs, err := DeConfig(conf)
-
+	err := conf.Validate()
 	if err != nil {
 		return nil, err
 	}
 
-	addr := strings.Split(configs.Addr, ",")
+	addr := strings.Split(conf.Addr, ",")
 
 	cli, err := client3.New(client3.Config{
 		Endpoints:   addr,
-		Password:    configs.Password,
-		DialTimeout: time.Duration(configs.TimeOut) * time.Second,
+		Password:    conf.Password,
+		DialTimeout: time.Duration(conf.TimeOut) * time.Second,
 	})
 
 	if err != nil {
@@ -110,6 +114,6 @@ func NewEtcd(conf string) (Etcd, error) {
 
 	return &Client{
 		Cli:  cli,
-		Time: time.Duration(configs.TimeOut) * time.Second,
+		Time: time.Duration(conf.TimeOut) * time.Second,
 	}, nil
 }

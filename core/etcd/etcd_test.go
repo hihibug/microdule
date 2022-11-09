@@ -8,12 +8,19 @@ import (
 var ETCD Etcd
 
 func init() {
-	etcd, err := NewEtcd(`{"addr":"172.16.102.109:2379,172.16.102.109:2380","password":"","time-out":5}`)
+
+	etcd, err := NewEtcd(&Config{
+		Addr:     "172.16.102.109:2379,172.16.102.109:2380",
+		Password: "",
+		TimeOut:  5,
+	})
+
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	fmt.Println(ErrEmptyAddr)
+
 	ETCD = etcd
 
 	_, err = ETCD.Put("/etcd_test/1", "test1")
@@ -80,6 +87,13 @@ func TestClient_PutLease(t *testing.T) {
 	lease, _ := ETCD.LeaseGrant(5)
 	opt := ETCD.WithLease(lease.ID)
 	_, err := ETCD.PutLease("/etcd_test/lease", "lease_test", opt)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func TestClient_Close(t *testing.T) {
+	err := ETCD.Close()
 	if err != nil {
 		fmt.Println(err)
 	}
