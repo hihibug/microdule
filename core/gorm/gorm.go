@@ -12,11 +12,19 @@ type (
 
 	Gorm interface {
 		Client() *gorm.DB
+		Close() error
 	}
+
+	OptConfig func(mode string) *gorm.Config
 )
 
 func (db *DB) Client() *gorm.DB {
 	return db.Cli
+}
+
+func (db *DB) Close() error {
+	d, _ := db.Cli.DB()
+	return d.Close()
 }
 
 // NewGorm 新建gorm
@@ -67,4 +75,14 @@ func NewMysql(m *MysqlConfig) gorm.Dialector {
 		DontSupportRenameColumn:   true,  // 用 `change` 重命名列，MySQL 8 之前的数据库和 MariaDB 不支持重命名列
 		SkipInitializeWithVersion: false, // 根据版本自动配置
 	})
+}
+
+func GetGormConfigStruct() *gorm.Config {
+	return &gorm.Config{}
+}
+
+func SetGormConfig(c *gorm.Config) OptConfig {
+	return func(mode string) *gorm.Config {
+		return c
+	}
 }

@@ -2,10 +2,25 @@ package gorm
 
 import (
 	"fmt"
+	"gorm.io/gorm/logger"
+	"log"
+	"os"
 	"testing"
+	"time"
 )
 
 func TestNewGorm(t *testing.T) {
+
+	opt := GetGormConfigStruct()
+
+	_default := logger.New(NewWriter(log.New(os.Stdout, "\r\n", log.LstdFlags)), logger.Config{
+		SlowThreshold: 200 * time.Millisecond,
+		LogLevel:      logger.Warn,
+		Colorful:      true,
+	})
+
+	opt.Logger = _default.LogMode(logger.Info)
+
 	DB, err := NewGorm(&Config{
 		DbType:  "mysql",
 		LogMode: "info",
@@ -16,6 +31,7 @@ func TestNewGorm(t *testing.T) {
 			Username: "root",
 			Password: "root",
 		},
+		Opt: SetGormConfig(opt),
 	})
 
 	if err != nil {
