@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	ErrEmptyPath   = errors.New("empty path")
-	ErrEmptyDbName = errors.New("empty db_name")
+	ErrEmptyPath   = errors.New("config empty path")
+	ErrEmptyDbName = errors.New("config empty db_name")
 )
 
 type (

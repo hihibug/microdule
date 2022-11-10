@@ -1,0 +1,16 @@
+# etcd configuration
+etcd:
+  addr: '172.16.102.109:2379,172.16.102.109:2380'
+  password : ''
+  time-out : 5
+# mysql connect configuration
+db:
+  dbType: 'mysql'
+  path: '127.0.0.1:3306'
+  config: 'charset=utf8mb4&parseTime=True&loc=Local'
+  dbName: 'user_content'
+  username: 'root'
+  password: 'root'
+  maxIdleCons: 10
+  maxOpenCons: 100
+  logMode: "error"
