@@ -1,8 +1,11 @@
 package gorm
 
 import (
+	"github.com/hihibug/microdule/core/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"time"
 )
 
 type (
@@ -79,6 +82,14 @@ func NewMysql(m *MysqlConfig) gorm.Dialector {
 
 func GetGormConfigStruct() *gorm.Config {
 	return &gorm.Config{}
+}
+
+func SetGormLogZap(z *zap.Zap) logger.Interface {
+	return logger.New(z, logger.Config{
+		SlowThreshold: 200 * time.Millisecond,
+		LogLevel:      logger.Warn,
+		Colorful:      false,
+	})
 }
 
 func SetGormConfig(c *gorm.Config) OptConfig {

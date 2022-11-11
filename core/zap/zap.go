@@ -151,6 +151,6 @@ func NewZapWriter(z *zap.Logger) *Zap {
 }
 
 func (z *Zap) Printf(format string, v ...interface{}) {
-	z.Log.Warn(fmt.Sprintf(format, v...))
+	z.Log.Warn(fmt.Sprintf(format+" ", v...))
 	return
 }

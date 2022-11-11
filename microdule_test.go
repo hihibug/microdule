@@ -3,7 +3,6 @@ package microdule
 import (
 	"github.com/hihibug/microdule/core/gorm"
 	"github.com/hihibug/microdule/core/zap"
-	"gorm.io/gorm/logger"
 	"log"
 	"sync"
 	"testing"
@@ -19,14 +18,13 @@ func TestNewService(t *testing.T) {
 	global = s.Options()
 
 	gormConf := gorm.GetGormConfigStruct()
-	//NewZapWriter 对log.New函数的再次封装，从而实现是否通过zap打印日志
-	_default := logger.New(zap.NewZapWriter(global.Log.Client()), logger.Config{
-		SlowThreshold: 200 * time.Millisecond,
-		LogLevel:      logger.Warn,
-		Colorful:      false,
-	})
 
-	gorm.LogGorm(global.Config.Data.DB.LogMode, gormConf, _default)
+	//NewZapWriter 对log.New函数的再次封装，从而实现是否通过zap打印日志
+	gorm.LogGorm(
+		global.Config.Data.DB.LogMode,
+		gormConf,
+		gorm.SetGormLogZap(zap.NewZapWriter(global.Log.Client())),
+	)
 
 	//获取db配置
 	dbConf := global.Config.ConfigToGormMysql(gorm.SetGormConfig(gormConf))
