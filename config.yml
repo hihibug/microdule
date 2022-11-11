@@ -3,6 +3,7 @@ etcd:
   addr: '172.16.102.109:2379,172.16.102.109:2380'
   password : ''
   time-out : 5
+
 # mysql connect configuration
 db:
   dbType: 'mysql'
@@ -13,4 +14,22 @@ db:
   password: 'root'
   maxIdleCons: 10
   maxOpenCons: 100
-  logMode: "error"
+  logMode: "info"
+
+# mysql connect configuration
+redis:
+  addr: '127.0.0.1:6379'
+  db: 0
+  password: ''
+
+# logger configuration
+log:
+  level: 'info'
+  format: 'json'
+  prefix: ''
+  director: 'storage/log'
+  linkName: 'latest_log'
+  showLine: true
+  encodeLevel: 'LowercaseLevelEncoder'
+  stacktraceKey: 'stacktrace'
+  logInConsole: false

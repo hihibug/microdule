@@ -1,10 +1,16 @@
 package viper
 
-import "github.com/hihibug/microdule/core/etcd"
+import (
+	"github.com/hihibug/microdule/core/etcd"
+	"github.com/hihibug/microdule/core/redis"
+	"github.com/hihibug/microdule/core/zap"
+)
 
 type Config struct {
-	DB   DbConfig     `json:"db" yaml:"db"`
-	Etcd *etcd.Config `json:"etcd" yaml:"etcd"`
+	DB    DbConfig      `json:"db" yaml:"db"`
+	Etcd  *etcd.Config  `json:"etcd" yaml:"etcd"`
+	Redis *redis.Config `json:"redis" yaml:"redis"`
+	Log   *zap.Config   `json:"log" yaml:"log"`
 }
 
 type DbConfig struct {
@@ -17,10 +23,4 @@ type DbConfig struct {
 	MaxIdleCons int    `json:"maxIdleCons" yaml:"maxIdleCons"`
 	MaxOpenCons int    `json:"maxOpenCons" yaml:"maxOpenCons"`
 	LogMode     string `json:"logMode" yaml:"logMode"`
-}
-
-type EtcdConfig struct {
-	Addr     string `json:"addr" yaml:"addr"`
-	Password string `json:"password" yaml:"password"`
-	TimeOut  int    `json:"time-out" yaml:"time-out"`
 }

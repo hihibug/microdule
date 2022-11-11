@@ -4,15 +4,14 @@ import (
 	"errors"
 )
 
-type (
-	Service interface {
-		Name() string
-		Init(...Option)
-		Options() Options
-		Run() error
-		Stop()
-	}
-)
+type Service interface {
+	Name() string
+	Init(...Option)
+	Options() *Options
+	Close() func()
+	Run() error
+	Stop()
+}
 
 func NewService(opt ...Option) Service {
 	return newService(opt...)
@@ -28,8 +27,16 @@ func (s *service) Init(opts ...Option) {
 	}
 }
 
-func (s *service) Options() Options {
-	return s.opts
+func (s *service) Options() *Options {
+	return &s.opts
+}
+
+func (s *service) Close() func() {
+	return func() {
+		s.opts.Gorm.Close()
+		s.opts.Redis.Close()
+		s.opts.Etcd.Close()
+	}
 }
 
 func (s *service) Run() error {

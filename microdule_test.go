@@ -1,44 +1,87 @@
 package microdule
 
 import (
-	"fmt"
-	"github.com/hihibug/microdule/core/etcd"
 	"github.com/hihibug/microdule/core/gorm"
+	"github.com/hihibug/microdule/core/zap"
+	"gorm.io/gorm/logger"
+	"log"
+	"sync"
 	"testing"
+	"time"
 )
 
-var Ser Options
+var global *Options
 
 func TestNewService(t *testing.T) {
-
 	//初始化服务
 	s := NewService(Name("test"))
 
-	Ser = s.Options()
+	global = s.Options()
+
+	gormConf := gorm.GetGormConfigStruct()
+	//NewZapWriter 对log.New函数的再次封装，从而实现是否通过zap打印日志
+	_default := logger.New(zap.NewZapWriter(global.Log.Client()), logger.Config{
+		SlowThreshold: 200 * time.Millisecond,
+		LogLevel:      logger.Warn,
+		Colorful:      false,
+	})
+
+	gorm.LogGorm(global.Config.Data.DB.LogMode, gormConf, _default)
 
 	//获取db配置
-	dbConf := Ser.Config.ConfigToGormMysql(nil)
-	//初始化db
-	db, err := gorm.NewGorm(dbConf)
-	if err != nil {
-		panic("mysql error " + err.Error())
-	}
-	defer db.Close()
+	dbConf := global.Config.ConfigToGormMysql(gorm.SetGormConfig(gormConf))
 
-	//初始化etcd
-	etd, err := etcd.NewEtcd(Ser.Config.Data.Etcd)
-	if err != nil {
-		panic("etcd error " + err.Error())
-	}
-	defer etd.Close()
-
+	//初始化组件
 	s.Init(
-		DB(db),
-		ETCD(etd),
+		Gorm(dbConf),
+		Etcd(global.Config.Data.Etcd),
+		Redis(global.Config.Data.Redis),
 	)
 
-	err = s.Run()
-	if err != nil {
-		fmt.Println(err)
+	//关闭链接
+	defer s.Close()
+
+	//global.Redis.Client().Set("test-11", "test", 86400*time.Second)
+	GoMysql(1, 1)
+}
+
+func GoMysql(num, cnum int) {
+	var wg sync.WaitGroup
+	ch := make(chan struct{}, cnum)
+	for i := 0; i < num; i++ {
+		ch <- struct{}{}
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			a := make([]map[string]interface{}, 0)
+			err := global.Gorm.Client().Table("users").Find(&a).Error
+			if err != nil {
+				log.Println(err)
+			}
+			log.Println(a)
+			time.Sleep(time.Second)
+			<-ch
+		}(i)
 	}
+	wg.Wait()
+}
+
+func GoRedis(num, cnum int) {
+	var wg sync.WaitGroup
+	ch := make(chan struct{}, cnum)
+	for i := 0; i < num; i++ {
+		ch <- struct{}{}
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			c := global.Redis.Client().Get("test-11")
+			if c.Err() != nil {
+				log.Println(c.Err())
+			}
+			log.Println(c.Val())
+			time.Sleep(time.Second)
+			<-ch
+		}(i)
+	}
+	wg.Wait()
 }
