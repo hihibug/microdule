@@ -1,3 +1,15 @@
+# rest configuration
+rest:
+  mode: "debug"
+  LogColType: false
+  LogPath: ""
+  UseHtml: false
+  DelimsStr: ""
+  DelimsEnd: ""
+  StaticPath: ""
+  TmpPath: ""
+  Addr: "8999"
+  
 # etcd configuration
 etcd:
   addr: '172.16.102.109:2379,172.16.102.109:2380'

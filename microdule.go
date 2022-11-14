@@ -1,14 +1,14 @@
 package microdule
 
-import (
-	"errors"
-)
+import "github.com/hihibug/microdule/rest"
 
 type Service interface {
 	Name() string
 	Init(...Option)
 	Options() *Options
-	Close() func()
+	Rest(string) rest.Rest
+	Rpc() rest.Rest
+	Close()
 	Run() error
 	Stop()
 }
@@ -31,16 +31,40 @@ func (s *service) Options() *Options {
 	return &s.opts
 }
 
-func (s *service) Close() func() {
-	return func() {
+func (s *service) Close() {
+
+	if s.opts.Gorm != nil {
 		s.opts.Gorm.Close()
+	}
+
+	if s.opts.Redis != nil {
 		s.opts.Redis.Close()
+	}
+
+	if s.opts.Etcd != nil {
 		s.opts.Etcd.Close()
 	}
+
+	return
 }
 
 func (s *service) Run() error {
-	return errors.New("test")
+	//fmt.Println(s)
+	return nil
+}
+
+func (s *service) Rest(t string) rest.Rest {
+	switch t {
+	case "gin":
+		return rest.NewGin(s.opts.Config.Data.Rest)
+	default:
+		return rest.NewGin(s.opts.Config.Data.Rest)
+	}
+}
+
+func (s *service) Rpc() rest.Rest {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (s *service) Stop() {

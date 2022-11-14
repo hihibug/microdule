@@ -3,6 +3,7 @@ package etcd
 import (
 	"errors"
 	"github.com/hihibug/microdule/core"
+	"go.uber.org/zap"
 	"reflect"
 )
 
@@ -16,6 +17,7 @@ type Config struct {
 	Addr     string `json:"addr" yaml:"addr"`
 	Password string `json:"password" yaml:"password"`
 	TimeOut  int    `json:"time-out" yaml:"time-out"`
+	Log      *zap.Logger
 }
 
 func (c *Config) Validate() error {

@@ -1,8 +1,8 @@
 package microdule
 
 import (
-	"github.com/hihibug/microdule/core/gorm"
-	"github.com/hihibug/microdule/core/zap"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"log"
 	"sync"
 	"testing"
@@ -17,30 +17,42 @@ func TestNewService(t *testing.T) {
 
 	global = s.Options()
 
-	gormConf := gorm.GetGormConfigStruct()
+	//gormConf := gorm.GetGormConfigStruct()
 
 	//NewZapWriter 对log.New函数的再次封装，从而实现是否通过zap打印日志
-	gorm.LogGorm(
-		global.Config.Data.DB.LogMode,
-		gormConf,
-		gorm.SetGormLogZap(zap.NewZapWriter(global.Log.Client())),
-	)
+	//gorm.LogGorm(
+	//	global.Config.Data.DB.LogMode,
+	//	gormConf,
+	//	gorm.SetGormLogZap(zap.NewZapWriter(global.Log.Client())),
+	//)
 
 	//获取db配置
-	dbConf := global.Config.ConfigToGormMysql(gorm.SetGormConfig(gormConf))
+	//dbConf := global.Config.ConfigToGormMysql(gorm.SetGormConfig(gormConf))
+
+	global.Config.Data.Etcd.Log = global.Log.Client()
 
 	//初始化组件
 	s.Init(
-		Gorm(dbConf),
+		//Gorm(dbConf),
 		Etcd(global.Config.Data.Etcd),
-		Redis(global.Config.Data.Redis),
+		//Redis(global.Config.Data.Redis),
 	)
 
 	//关闭链接
 	defer s.Close()
 
-	//global.Redis.Client().Set("test-11", "test", 86400*time.Second)
-	GoMysql(1, 1)
+	rest := s.Rest("gin")
+	a := rest.GetGin().Route.Group("")
+	{
+		a.GET("/test", func(context *gin.Context) {
+			fmt.Println("test")
+		})
+		a.GET("/err", func(c *gin.Context) {
+			panic("test")
+		})
+	}
+
+	rest.Run()
 }
 
 func GoMysql(num, cnum int) {

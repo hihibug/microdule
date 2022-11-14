@@ -98,6 +98,7 @@ func NewEtcd(conf *Config) (Etcd, error) {
 		Endpoints:   addr,
 		Password:    conf.Password,
 		DialTimeout: time.Duration(conf.TimeOut) * time.Second,
+		Logger:      conf.Log,
 	})
 
 	if err != nil {
