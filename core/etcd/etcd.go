@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"context"
+	"fmt"
 	client3 "go.etcd.io/etcd/client/v3"
 	"strings"
 	"time"
@@ -112,6 +113,8 @@ func NewEtcd(conf *Config) (Etcd, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("Init Etcd  Success \n")
 
 	return &Client{
 		Cli:  cli,

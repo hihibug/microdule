@@ -38,10 +38,10 @@ redis:
 log:
   level: 'info'
   format: 'json'
-  prefix: ''
+  prefix: 'microdule-test'
   director: 'storage/log'
   linkName: 'latest_log'
-  showLine: true
-  encodeLevel: 'LowercaseLevelEncoder'
+  showLine: false
+  encodeLevel: 'LowercaseColorLevelEncoder'
   stacktraceKey: 'stacktrace'
   logInConsole: false

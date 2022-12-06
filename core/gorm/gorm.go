@@ -1,6 +1,7 @@
 package gorm
 
 import (
+	"fmt"
 	"github.com/hihibug/microdule/core/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -55,12 +56,14 @@ func NewGorm(conf *Config) (Gorm, error) {
 	}
 
 	db, err := gorm.Open(dcr, conf.Opt(conf.LogMode))
+
 	if err != nil {
 		return nil, err
 	} else {
 		sqlDB, _ := db.DB()
 		sqlDB.SetMaxIdleConns(conf.MaxIdleCons)
 		sqlDB.SetMaxOpenConns(conf.MaxOpenCons)
+		fmt.Printf("Init Gorm  Success \n")
 		return &DB{
 			db,
 		}, nil

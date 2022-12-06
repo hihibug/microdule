@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/hihibug/microdule/core/middleware"
 	"io"
@@ -52,6 +53,7 @@ func (g *Gin) GetGin() *Gin {
 }
 
 func (g *Gin) Run() {
+	fmt.Printf("Init Rest  Success Port: %s \n", g.Config.Addr)
 	s := &http.Server{
 		Addr:           ":" + g.Config.Addr,
 		Handler:        g.Route,

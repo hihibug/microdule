@@ -9,6 +9,7 @@ import (
 	"github.com/hihibug/microdule/core/zap"
 	"github.com/hihibug/microdule/rest"
 	"github.com/hihibug/microdule/rpc"
+	"reflect"
 )
 
 type (
@@ -33,18 +34,22 @@ type (
 
 func newOptions(opts ...Option) Options {
 	opt := Options{
-		Config:  viper.NewViper("config.yml"),
 		Context: context.Background(),
 	}
 
-	opt.Log = zap.NewZap(opt.Config.Data.Log)
+	for k, o := range opts {
+		if k > 0 && reflect.DeepEqual(opt.Config, viper.Viper{}) {
+			opt.Config = viper.NewViper("config.yml")
+		}
 
-	if opt.Config.Err != nil {
-		panic(opt.Config.Err)
+		if opt.Config.Err != nil {
+			panic(opt.Config.Err)
+		}
+		o(&opt)
 	}
 
-	for _, o := range opts {
-		o(&opt)
+	if opt.Log == nil {
+		opt.Log = zap.NewZap(opt.Config.Data.Log)
 	}
 
 	return opt
@@ -56,32 +61,47 @@ func Name(n string) Option {
 	}
 }
 
-func Gorm(dbConf *gorm.Config) Option {
-	db, err := gorm.NewGorm(dbConf)
-	if err != nil {
-		panic("mysql error " + err.Error())
-	}
+func Config(path string) Option {
 	return func(options *Options) {
+		options.Config = viper.NewViper(path)
+	}
+}
+
+func Gorm(dbConf *gorm.Config) Option {
+	return func(options *Options) {
+		if dbConf == nil {
+			dbConf = options.Config.ConfigToGormMysql(gorm.SetGormConfig(gorm.GetGormConfigStruct()))
+		}
+		db, err := gorm.NewGorm(dbConf)
+		if err != nil {
+			panic("mysql error " + err.Error())
+		}
 		options.Gorm = db
 	}
 }
 
 func Etcd(e *etcd.Config) Option {
-	etd, err := etcd.NewEtcd(e)
-	if err != nil {
-		panic("etcd error " + err.Error())
-	}
 	return func(options *Options) {
+		if e == nil {
+			e = options.Config.Data.Etcd
+		}
+		etd, err := etcd.NewEtcd(e)
+		if err != nil {
+			panic("etcd error " + err.Error())
+		}
 		options.Etcd = etd
 	}
 }
 
 func Redis(r *redis.Config) Option {
-	rds, err := redis.NewRedis(r)
-	if err != nil {
-		panic("redis error " + err.Error())
-	}
 	return func(options *Options) {
+		if r == nil {
+			r = options.Config.Data.Redis
+		}
+		rds, err := redis.NewRedis(r)
+		if err != nil {
+			panic("redis error " + err.Error())
+		}
 		options.Redis = rds
 	}
 }
