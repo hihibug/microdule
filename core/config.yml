@@ -9,6 +9,9 @@ rest:
   StaticPath: ""
   TmpPath: ""
   Addr: "8999"
+rpc:
+  Addr: "18999"
+  name: "TestService"
   
 # etcd configuration
 etcd:

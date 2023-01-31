@@ -1,4 +1,4 @@
-package rest
+package web
 
 type Config struct {
 	Mode       string `json:"mode" yaml:"mode"`

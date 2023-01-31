@@ -2,8 +2,8 @@ package etcd
 
 import (
 	"context"
-	"fmt"
 	client3 "go.etcd.io/etcd/client/v3"
+	"log"
 	"strings"
 	"time"
 )
@@ -16,6 +16,7 @@ type (
 	}
 
 	Etcd interface {
+		Clients() *client3.Client
 		Get(name string) (res *client3.GetResponse, err error)                                   // Get 取值
 		GetPrefix(name string) (res *client3.GetResponse, err error)                             // GetPrefix 前缀取值
 		Put(name, value string) (res *client3.PutResponse, err error)                            // Put 存值
@@ -28,6 +29,10 @@ type (
 		Close() error                                                                            // Close 关闭etcd
 	}
 )
+
+func (c *Client) Clients() *client3.Client {
+	return c.Cli
+}
 
 func (c *Client) Get(name string) (res *client3.GetResponse, err error) {
 	ctx, ConFunc := context.WithTimeout(context.Background(), c.Time)
@@ -114,7 +119,7 @@ func NewEtcd(conf *Config) (Etcd, error) {
 		return nil, err
 	}
 
-	fmt.Printf("Init Etcd  Success \n")
+	log.Printf("Init  etcd: Success \n")
 
 	return &Client{
 		Cli:  cli,

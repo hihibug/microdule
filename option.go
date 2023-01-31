@@ -7,8 +7,8 @@ import (
 	"github.com/hihibug/microdule/core/redis"
 	"github.com/hihibug/microdule/core/viper"
 	"github.com/hihibug/microdule/core/zap"
-	"github.com/hihibug/microdule/rest"
 	"github.com/hihibug/microdule/rpc"
+	"github.com/hihibug/microdule/web"
 	"reflect"
 )
 
@@ -25,8 +25,8 @@ type (
 		Log    zap.Log
 		Config viper.Viper
 
-		Rest rest.Rest
-		Rpc  rpc.Rpc
+		Web *web.Gin
+		Rpc rpc.Rpc
 
 		Context context.Context
 	}

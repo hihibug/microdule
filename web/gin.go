@@ -1,4 +1,4 @@
-package rest
+package web
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ type Gin struct {
 	Config *Config
 }
 
-func NewGin(conf *Config) Rest {
+func NewGin(conf *Config) *Gin {
 	gin.SetMode(conf.Mode)
 
 	if !conf.LogColType {
@@ -48,7 +48,7 @@ func NewGin(conf *Config) Rest {
 	}
 }
 
-func (g *Gin) GetGin() *Gin {
+func (g *Gin) Client() *Gin {
 	return g
 }
 

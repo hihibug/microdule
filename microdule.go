@@ -1,13 +1,17 @@
 package microdule
 
-import "github.com/hihibug/microdule/rest"
+import (
+	"github.com/hihibug/microdule/rpc"
+	"github.com/hihibug/microdule/web"
+	"google.golang.org/grpc"
+)
 
 type Service interface {
 	Name() string
 	Init(...Option)
 	Options() *Options
-	Rest(string) rest.Rest
-	Rpc() rest.Rest
+	Rest() web.Web
+	Rpc(...grpc.ServerOption) rpc.Rpc
 	Close()
 	Run() error
 	Stop()
@@ -53,18 +57,12 @@ func (s *service) Run() error {
 	return nil
 }
 
-func (s *service) Rest(t string) rest.Rest {
-	switch t {
-	case "gin":
-		return rest.NewGin(s.opts.Config.Data.Rest)
-	default:
-		return rest.NewGin(s.opts.Config.Data.Rest)
-	}
+func (s *service) Rest() web.Web {
+	return web.NewGin(s.opts.Config.Data.Rest)
 }
 
-func (s *service) Rpc() rest.Rest {
-	//TODO implement me
-	panic("implement me")
+func (s *service) Rpc(opt ...grpc.ServerOption) rpc.Rpc {
+	return rpc.NewGrpc(s.opts.Config.Data.Rpc, opt...)
 }
 
 func (s *service) Stop() {

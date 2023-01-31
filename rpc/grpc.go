@@ -2,17 +2,19 @@ package rpc
 
 import (
 	"fmt"
+	etcdClientV3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 	"net"
 )
 
 type Grpc struct {
-	RpcSrv *grpc.Server
-	Config Config
+	RpcSrv       *grpc.Server
+	Config       *Config
+	EtcdRegister *ServiceRegister
 }
 
-func NewGrpc(c Config) Rpc {
-	grpcServer := grpc.NewServer()
+func NewGrpc(c *Config, opt ...grpc.ServerOption) Rpc {
+	grpcServer := grpc.NewServer(opt...)
 
 	return &Grpc{
 		RpcSrv: grpcServer,
@@ -20,8 +22,16 @@ func NewGrpc(c Config) Rpc {
 	}
 }
 
-func (g *Grpc) GetGrpc() *Grpc {
+func (g *Grpc) Client() *Grpc {
 	return g
+}
+
+func (g *Grpc) Register(etcd *etcdClientV3.Client) (*ServiceRegister, error) {
+	return NewRpcServiceRegister(etcd,
+		g.Config.Name,
+		fmt.Sprint(g.Config.IP, ":", g.Config.Addr),
+		5,
+	)
 }
 
 func (g *Grpc) Run() {

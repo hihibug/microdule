@@ -1,8 +1,8 @@
 package redis
 
 import (
-	"fmt"
 	"github.com/go-redis/redis"
+	"log"
 )
 
 type Redis interface {
@@ -30,7 +30,7 @@ func NewRedis(conf *Config) (Redis, error) {
 	if err != nil {
 		return nil, err
 	} else {
-		fmt.Printf("Init Redis Success \n")
+		log.Printf("Init redis: Success \n")
 		return &Client{client}, err
 	}
 }

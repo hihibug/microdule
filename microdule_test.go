@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/hihibug/microdule/core/gorm"
+	"github.com/hihibug/microdule/core/utils"
 	"github.com/hihibug/microdule/core/zap"
 	"log"
+	"os"
 	"sync"
 	"testing"
 	"time"
@@ -18,7 +20,6 @@ func TestNewService(t *testing.T) {
 	s := NewService(
 		Config("core/config.yml"),
 		Name("test"),
-		Redis(nil),
 	)
 
 	global = s.Options()
@@ -36,6 +37,7 @@ func TestNewService(t *testing.T) {
 
 	//初始化组件
 	s.Init(
+		Redis(nil),
 		Gorm(global.Config.ConfigToGormMysql(gorm.SetGormConfig(gormConf))),
 		Etcd(global.Config.Data.Etcd),
 	)
@@ -44,7 +46,8 @@ func TestNewService(t *testing.T) {
 	defer s.Close()
 
 	//开启rest
-	rest := s.Rest("gin").GetGin()
+	rest := s.Rest().Client()
+
 	a := rest.Route.Group("")
 	{
 		a.GET("/test", func(context *gin.Context) {
@@ -56,8 +59,16 @@ func TestNewService(t *testing.T) {
 		})
 	}
 
-	//GoMysql(10, 10)
+	ip, _ := utils.ExternalIP()
+	global.Config.Data.Rpc.IP = ip
+	rpc := s.Rpc().Client()
+	register, err := s.Rpc().Client().Register(global.Etcd.Clients())
+	if err != nil {
+		os.Exit(0)
+	}
+	go register.ListenLeaseRespChan()
 
+	rpc.Run()
 	rest.Run()
 }
 
