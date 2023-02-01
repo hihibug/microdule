@@ -10,7 +10,7 @@ type Service interface {
 	Name() string
 	Init(...Option)
 	Options() *Options
-	Rest() web.Web
+	Http() web.Web
 	Rpc(...grpc.ServerOption) rpc.Rpc
 	Close()
 	Run() error
@@ -57,7 +57,7 @@ func (s *service) Run() error {
 	return nil
 }
 
-func (s *service) Rest() web.Web {
+func (s *service) Http() web.Web {
 	return web.NewGin(s.opts.Config.Data.Rest)
 }
 

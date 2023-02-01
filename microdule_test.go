@@ -46,7 +46,7 @@ func TestNewService(t *testing.T) {
 	defer s.Close()
 
 	//开启rest
-	rest := s.Rest().Client()
+	rest := s.Http().Client()
 
 	a := rest.Route.Group("")
 	{
