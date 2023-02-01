@@ -34,7 +34,7 @@ func (g *Grpc) Register(etcd *etcdClientV3.Client) (*ServiceRegister, error) {
 	)
 }
 
-func (g *Grpc) Run() {
+func (g *Grpc) Run() error {
 
 	address := fmt.Sprintf(":%d", g.Config.Addr)
 
@@ -47,6 +47,8 @@ func (g *Grpc) Run() {
 	err = g.RpcSrv.Serve(lis)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }

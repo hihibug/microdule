@@ -6,7 +6,7 @@ import (
 )
 
 func TestRest(t *testing.T) {
-	_ := web.NewGin(&web.Config{
+	_ = web.NewGin(&web.Config{
 		Mode:       "debug",
 		LogColType: false,
 		LogPath:    "",

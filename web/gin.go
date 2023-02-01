@@ -1,10 +1,10 @@
 package web
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/hihibug/microdule/core/middleware"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -52,8 +52,8 @@ func (g *Gin) Client() *Gin {
 	return g
 }
 
-func (g *Gin) Run() {
-	fmt.Printf("Init Rest  Success Port: %s \n", g.Config.Addr)
+func (g *Gin) Run() error {
+	log.Printf("rest  port: %s \n", g.Config.Addr)
 	s := &http.Server{
 		Addr:           ":" + g.Config.Addr,
 		Handler:        g.Route,
@@ -64,6 +64,8 @@ func (g *Gin) Run() {
 
 	err := s.ListenAndServe()
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }
