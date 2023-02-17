@@ -3,6 +3,7 @@ package web
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/hihibug/microdule/core/middleware"
+	"github.com/hihibug/microdule/core/utils"
 	"io"
 	"log"
 	"net/http"
@@ -22,7 +23,11 @@ func NewGin(conf *Config) *Gin {
 		// 禁用控制台颜色，将日志写入文件时不需要控制台颜色。
 		gin.DisableConsoleColor()
 		defPath, _ := os.Getwd()
-		accessLogPath := defPath + "/" + conf.LogPath + "/access-" + time.Now().Format("2006-01-02") + ".log"
+		path := defPath + "/" + conf.LogPath
+		if ok, _ := utils.PathExists(path); !ok { // 判断是否有Director文件夹
+			_ = os.Mkdir(path, os.ModePerm)
+		}
+		accessLogPath := path + "/access-" + time.Now().Format("2006-01-02") + ".log"
 		// 记录到文件。
 		f, _ := os.Create(accessLogPath)
 		gin.DefaultWriter = io.MultiWriter(f)
