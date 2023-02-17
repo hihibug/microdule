@@ -21,7 +21,8 @@ func NewGin(conf *Config) *Gin {
 	if !conf.LogColType {
 		// 禁用控制台颜色，将日志写入文件时不需要控制台颜色。
 		gin.DisableConsoleColor()
-		accessLogPath := conf.LogPath + "/access-" + time.Now().Format("2006-01-02") + ".log"
+		defPath, _ := os.Getwd()
+		accessLogPath := defPath + "/" + conf.LogPath + "/access-" + time.Now().Format("2006-01-02") + ".log"
 		// 记录到文件。
 		f, _ := os.Create(accessLogPath)
 		gin.DefaultWriter = io.MultiWriter(f)
