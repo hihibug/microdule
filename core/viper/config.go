@@ -13,7 +13,7 @@ type Config struct {
 	Etcd  *etcd.Config  `json:"etcd" yaml:"etcd"`
 	Redis *redis.Config `json:"redis" yaml:"redis"`
 	Log   *zap.Config   `json:"log" yaml:"log"`
-	Rest  *web.Config   `json:"rest" yaml:"rest"`
+	Http  *web.Config   `json:"http" yaml:"rest"`
 	Rpc   *rpc.Config   `json:"rpc" yaml:"rpc"`
 }
 

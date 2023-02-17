@@ -58,7 +58,7 @@ func (s *service) Run() error {
 }
 
 func (s *service) Http() web.Web {
-	return web.NewGin(s.opts.Config.Data.Rest)
+	return web.NewGin(s.opts.Config.Data.Http)
 }
 
 func (s *service) Rpc(opt ...grpc.ServerOption) rpc.Rpc {
