@@ -31,9 +31,10 @@ func NewGin(conf *Config) *Gin {
 
 	// 初始化页面
 	if conf.UseHtml {
+		defPath, _ := os.Getwd()
 		route.Delims(conf.DelimsStr, conf.DelimsEnd)
-		route.Static(conf.StaticPath, conf.TmpPath)
-		route.LoadHTMLGlob(conf.TmpPath + "/*")
+		route.Static(defPath+"/"+conf.StaticPath, defPath+"/"+conf.TmpPath)
+		route.LoadHTMLGlob(defPath + "/" + conf.TmpPath + "/*")
 	}
 
 	//注册GinCors
