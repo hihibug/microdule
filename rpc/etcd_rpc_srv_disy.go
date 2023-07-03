@@ -28,10 +28,10 @@ type etcdResolver struct {
 func NewRpcServiceDiscovery(prefix string, etcdCli *clientv3.Client) (*grpc.ClientConn, error) {
 
 	etcdResolverBuilder := NewEtcdResolverBuilder(etcdCli)
-	resolver.Register(etcdResolverBuilder)
-
+	//resolver.Register(etcdResolverBuilder)
 	conn, err := grpc.Dial(
 		"etcd:///"+prefix,
+		grpc.WithResolvers(etcdResolverBuilder),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)

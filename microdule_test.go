@@ -2,12 +2,7 @@ package microdule
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/hihibug/microdule/core/gorm"
-	"github.com/hihibug/microdule/core/utils"
-	"github.com/hihibug/microdule/core/zap"
 	"log"
-	"os"
 	"sync"
 	"testing"
 	"time"
@@ -24,52 +19,53 @@ func TestNewService(t *testing.T) {
 
 	global = s.Options()
 
-	//NewZapWriter 对log.New函数的再次封装，从而实现是否通过zap打印日志
-	gormConf := gorm.GetGormConfigStruct()
-	gorm.LogGorm(
-		global.Config.Data.DB.LogMode,
-		gormConf,
-		gorm.SetGormLogZap(zap.NewZapWriter(global.Log.Client())),
-	)
+	fmt.Println(global.Config.Vp.Get("QiNu.Key"))
+	////NewZapWriter 对log.New函数的再次封装，从而实现是否通过zap打印日志
+	//gormConf := gorm.GetGormConfigStruct()
+	//gorm.LogGorm(
+	//	global.Config.Data.DB.LogMode,
+	//	gormConf,
+	//	gorm.SetGormLogZap(zap.NewZapWriter(global.Log.Client())),
+	//)
+	//
+	//// 设置etcd 日志
+	//global.Config.Data.Etcd.Log = global.Log.Client()
+	//
+	////初始化组件
+	//s.Init(
+	////Redis(nil),
+	////Gorm(global.Config.ConfigToGormMysql(gorm.SetGormConfig(gormConf))),
+	////Etcd(global.Config.Data.Etcd),
+	//)
+	//
+	////关闭链接
+	//defer s.Close()
+	//
+	////开启rest
+	//rest := s.Http().Client()
+	//
+	//a := rest.Route.Group("")
+	//{
+	//	a.GET("/test", func(context *gin.Context) {
+	//		fmt.Println("test")
+	//		global.Log.Client().Info("test")
+	//	})
+	//	a.GET("/err", func(c *gin.Context) {
+	//		panic("test")
+	//	})
+	//}
 
-	// 设置etcd 日志
-	global.Config.Data.Etcd.Log = global.Log.Client()
-
-	//初始化组件
-	s.Init(
-		Redis(nil),
-		Gorm(global.Config.ConfigToGormMysql(gorm.SetGormConfig(gormConf))),
-		Etcd(global.Config.Data.Etcd),
-	)
-
-	//关闭链接
-	defer s.Close()
-
-	//开启rest
-	rest := s.Http().Client()
-
-	a := rest.Route.Group("")
-	{
-		a.GET("/test", func(context *gin.Context) {
-			fmt.Println("test")
-			global.Log.Client().Info("test")
-		})
-		a.GET("/err", func(c *gin.Context) {
-			panic("test")
-		})
-	}
-
-	ip, _ := utils.ExternalIP()
-	global.Config.Data.Rpc.IP = ip
-	rpc := s.Rpc().Client()
-	register, err := s.Rpc().Client().Register(global.Etcd.Clients())
-	if err != nil {
-		os.Exit(0)
-	}
-	go register.ListenLeaseRespChan()
-
-	rpc.Run()
-	rest.Run()
+	//ip, _ := utils.ExternalIP()
+	//global.Config.Data.Rpc.IP = ip
+	//rpc := s.Rpc().Client()
+	//register, err := s.Rpc().Client().Register(global.Etcd.Clients())
+	//if err != nil {
+	//	os.Exit(0)
+	//}
+	//go register.ListenLeaseRespChan()
+	//
+	//rpc.Run()
+	//rest.Run()
 }
 
 func GoMysql(num, cnum int) {

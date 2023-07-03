@@ -12,6 +12,9 @@ rest:
 rpc:
   Addr: "18999"
   name: "TestService"
+
+QiNu:
+  Key: "123"
   
 # etcd configuration
 etcd:
