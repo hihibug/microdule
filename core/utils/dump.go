@@ -20,7 +20,7 @@ func IsLittleEndian() bool {
 	return *(*byte)(unsafe.Pointer(&n)) == 0x34
 }
 
-func IsNil(i interface{}) bool {
+func IsInterfaceNil(i interface{}) bool {
 	vi := reflect.ValueOf(i)
 	if vi.Kind() == reflect.Ptr {
 		return vi.IsNil()
