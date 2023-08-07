@@ -16,6 +16,7 @@ type GinValidator struct {
 	Trans     ut.Translator
 }
 
+// NewGinValidator 创建gin验证器
 func NewGinValidator(locale string) (validators *GinValidator, err error) {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		validators = &GinValidator{}
@@ -44,4 +45,13 @@ func NewGinValidator(locale string) (validators *GinValidator, err error) {
 		}
 	}
 	return
+}
+
+// FetchGinValidatorError 获取gin验证器错误
+func FetchGinValidatorError(err error, trans ut.Translator) interface{} {
+	errs, ok := err.(validator.ValidationErrors)
+	if ok {
+		return errs.Translate(trans)
+	}
+	return nil
 }
