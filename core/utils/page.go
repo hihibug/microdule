@@ -143,7 +143,7 @@ func ParallelSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []strin
 		if err != nil {
 			return err
 		}
-		db = dbs.Find(&db)
+		dbs.Scan(&db)
 		return nil
 	}
 
