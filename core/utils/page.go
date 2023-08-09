@@ -121,6 +121,40 @@ func GroupSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []string, 
 	return total, pageNum, db, nil
 }
 
+// ParallelSearchPageFmt 并行分页
+func ParallelSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []string, orderPrefix string) (total int64, pageNum int64, db interface{}, err error) {
+	page := &PageQuery{
+		Model:       model,
+		PageStruct:  q,
+		OrderKeys:   orderKeys,
+		OrderPrefix: orderPrefix,
+	}
+
+	f := func() error {
+		total, pageNum, err = page.PageTotal()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	f1 := func() error {
+		dbs, err := page.PageOrderBy()
+		if err != nil {
+			return err
+		}
+		db = dbs.Find(&db)
+		return nil
+	}
+
+	err = GoPanic(f, f1)
+	if err != nil {
+		return 0, 0, nil, err
+	}
+
+	return total, pageNum, db, nil
+}
+
 // PageTotal 统计总数 获取当前页数
 func (p *PageQuery) PageTotal() (total, pageNum int64, err error) {
 	err = p.Model.Count(&total).Error
