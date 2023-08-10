@@ -143,7 +143,9 @@ func ParallelSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []strin
 		if err != nil {
 			return err
 		}
-		dbs.Find(result)
+		if err = dbs.Find(result).Error; err != nil {
+			return err
+		}
 		return nil
 	}
 
@@ -177,7 +179,9 @@ func ParallelGroupSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []
 		if err != nil {
 			return err
 		}
-		dbs.Find(result)
+		if err = dbs.Find(result).Error; err != nil {
+			return err
+		}
 		return nil
 	}
 
