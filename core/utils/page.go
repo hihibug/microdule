@@ -122,7 +122,7 @@ func GroupSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []string, 
 }
 
 // ParallelSearchPageFmt 并行分页
-func ParallelSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []string, orderPrefix string) (total int64, pageNum int64, db interface{}, err error) {
+func ParallelSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []string, orderPrefix string) (total int64, pageNum int64, db []map[string]interface{}, err error) {
 	page := &PageQuery{
 		Model:       model,
 		PageStruct:  q,
@@ -130,7 +130,7 @@ func ParallelSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []strin
 		OrderPrefix: orderPrefix,
 	}
 
-	f := func() error {
+	f0 := func() error {
 		total, pageNum, err = page.PageTotal()
 		if err != nil {
 			return err
@@ -143,11 +143,45 @@ func ParallelSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []strin
 		if err != nil {
 			return err
 		}
-		dbs.Scan(&db)
+		dbs.Find(&db)
 		return nil
 	}
 
-	err = GoPanic(f, f1)
+	err = GoPanic(f0, f1)
+	if err != nil {
+		return 0, 0, nil, err
+	}
+
+	return total, pageNum, db, nil
+}
+
+// ParallelGroupSearchPageFmt 并行分页
+func ParallelGroupSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []string, orderPrefix string) (total int64, pageNum int64, db []map[string]interface{}, err error) {
+	page := &PageQuery{
+		Model:       model,
+		PageStruct:  q,
+		OrderKeys:   orderKeys,
+		OrderPrefix: orderPrefix,
+	}
+
+	f0 := func() error {
+		total, pageNum, err = page.GroupPageTotal()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	f1 := func() error {
+		dbs, err := page.PageOrderBy()
+		if err != nil {
+			return err
+		}
+		dbs.Find(&db)
+		return nil
+	}
+
+	err = GoPanic(f0, f1)
 	if err != nil {
 		return 0, 0, nil, err
 	}
@@ -157,7 +191,7 @@ func ParallelSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []strin
 
 // PageTotal 统计总数 获取当前页数
 func (p *PageQuery) PageTotal() (total, pageNum int64, err error) {
-	err = p.Model.Count(&total).Error
+	err = p.Model.Session(&gorm.Session{}).Count(&total).Error
 	pageNum = total / int64(p.PageStruct.Size)
 	if total%int64(p.PageStruct.Size) != 0 {
 		pageNum++
@@ -168,7 +202,7 @@ func (p *PageQuery) PageTotal() (total, pageNum int64, err error) {
 // GroupPageTotal 统计总数 获取当前页数
 func (p *PageQuery) GroupPageTotal() (total, pageNum int64, err error) {
 	//分页
-	count := p.Model.Count(&total)
+	count := p.Model.Session(&gorm.Session{}).Count(&total)
 	total = count.RowsAffected
 	err = count.Error
 
@@ -182,18 +216,19 @@ func (p *PageQuery) GroupPageTotal() (total, pageNum int64, err error) {
 // PageOrderBy 组装排序
 func (p *PageQuery) PageOrderBy() (db *gorm.DB, err error) {
 	//排序
+	model := p.Model.Session(&gorm.Session{})
 	if p.PageStruct.OrderKey != "" {
 		orderKey, err := OrderByString(p.OrderKeys[:], p.PageStruct.OrderKey, p.PageStruct.Desc)
 		if err != nil {
 			return p.Model, err
 		}
 		if p.OrderPrefix != "" {
-			p.Model = p.Model.Order(p.OrderPrefix + orderKey)
+			p.Model = model.Order(p.OrderPrefix + orderKey)
 		} else {
-			p.Model = p.Model.Order(orderKey)
+			p.Model = model.Order(orderKey)
 		}
 	}
-	db = p.Model.Limit(p.PageStruct.Size).Offset((p.PageStruct.Page - 1) * p.PageStruct.Size)
+	db = model.Limit(p.PageStruct.Size).Offset((p.PageStruct.Page - 1) * p.PageStruct.Size)
 	return
 }
 
