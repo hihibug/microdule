@@ -122,7 +122,7 @@ func GroupSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []string, 
 }
 
 // ParallelSearchPageFmt 并行分页
-func ParallelSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []string, orderPrefix string) (total int64, pageNum int64, db []map[string]interface{}, err error) {
+func ParallelSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []string, orderPrefix string, result interface{}) (total int64, pageNum int64, err error) {
 	page := &PageQuery{
 		Model:       model,
 		PageStruct:  q,
@@ -143,20 +143,20 @@ func ParallelSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []strin
 		if err != nil {
 			return err
 		}
-		dbs.Find(&db)
+		dbs.Find(result)
 		return nil
 	}
 
 	err = GoPanic(f0, f1)
 	if err != nil {
-		return 0, 0, nil, err
+		return 0, 0, err
 	}
 
-	return total, pageNum, db, nil
+	return total, pageNum, nil
 }
 
 // ParallelGroupSearchPageFmt 并行分页
-func ParallelGroupSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []string, orderPrefix string) (total int64, pageNum int64, db []map[string]interface{}, err error) {
+func ParallelGroupSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []string, orderPrefix string, result interface{}) (total int64, pageNum int64, err error) {
 	page := &PageQuery{
 		Model:       model,
 		PageStruct:  q,
@@ -177,16 +177,16 @@ func ParallelGroupSearchPageFmt(model *gorm.DB, q SearchPageParams, orderKeys []
 		if err != nil {
 			return err
 		}
-		dbs.Find(&db)
+		dbs.Find(result)
 		return nil
 	}
 
 	err = GoPanic(f0, f1)
 	if err != nil {
-		return 0, 0, nil, err
+		return 0, 0, err
 	}
 
-	return total, pageNum, db, nil
+	return total, pageNum, nil
 }
 
 // PageTotal 统计总数 获取当前页数
