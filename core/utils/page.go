@@ -227,13 +227,12 @@ func (p *PageQuery) PageOrderBy() (db *gorm.DB, err error) {
 			return p.Model, err
 		}
 		if p.OrderPrefix != "" {
-			p.Model = model.Order(p.OrderPrefix + orderKey)
+			model = model.Order(p.OrderPrefix + orderKey)
 		} else {
-			p.Model = model.Order(orderKey)
+			model = model.Order(orderKey)
 		}
 	}
-	db = model.Limit(p.PageStruct.Size).Offset((p.PageStruct.Page - 1) * p.PageStruct.Size)
-	return
+	return model.Limit(p.PageStruct.Size).Offset((p.PageStruct.Page - 1) * p.PageStruct.Size), nil
 }
 
 // PageFmt Page 格式化输出
