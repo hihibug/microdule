@@ -1,7 +1,6 @@
 package microdule
 
 import (
-	"fmt"
 	"log"
 	"sync"
 	"testing"
@@ -19,7 +18,7 @@ func TestNewService(t *testing.T) {
 
 	global = s.Options()
 
-	fmt.Println(global.Config.Vp.Get("QiNu.Key"))
+	// fmt.Println(global.Config.Vp.Get("QiNu.Key"))
 	////NewZapWriter 对log.New函数的再次封装，从而实现是否通过zap打印日志
 	//gormConf := gorm.GetGormConfigStruct()
 	//gorm.LogGorm(

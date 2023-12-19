@@ -17,6 +17,8 @@ type Service interface {
 	Stop()
 }
 
+type Option func(*Options)
+
 func NewService(opt ...Option) Service {
 	return newService(opt...)
 }

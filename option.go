@@ -2,6 +2,8 @@ package microdule
 
 import (
 	"context"
+	"reflect"
+
 	"github.com/hihibug/microdule/core/etcd"
 	"github.com/hihibug/microdule/core/gorm"
 	"github.com/hihibug/microdule/core/redis"
@@ -9,28 +11,23 @@ import (
 	"github.com/hihibug/microdule/core/zap"
 	"github.com/hihibug/microdule/rpc"
 	"github.com/hihibug/microdule/web"
-	"reflect"
 )
 
-type (
-	Option func(*Options)
+type Options struct {
+	Name string
 
-	Options struct {
-		Name string
+	Gorm  gorm.Gorm
+	Etcd  etcd.Etcd
+	Redis redis.Redis
 
-		Gorm  gorm.Gorm
-		Etcd  etcd.Etcd
-		Redis redis.Redis
+	Log    zap.Log
+	Config viper.Viper
 
-		Log    zap.Log
-		Config viper.Viper
+	Web *web.Gin
+	Rpc rpc.Rpc
 
-		Web *web.Gin
-		Rpc rpc.Rpc
-
-		Context context.Context
-	}
-)
+	Context context.Context
+}
 
 func newOptions(opts ...Option) Options {
 	opt := Options{
