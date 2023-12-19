@@ -1,9 +1,11 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"runtime/debug"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GinErrorHttp(c *gin.Context) {
@@ -12,8 +14,9 @@ func GinErrorHttp(c *gin.Context) {
 			//打印错误堆栈信息
 			debug.PrintStack()
 			//封装通用json返回
+			log.Println("recover err ", r)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": r.(string),
+				"message": "服务器异常",
 				"code":    http.StatusInternalServerError,
 			})
 		}
