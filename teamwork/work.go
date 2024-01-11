@@ -10,7 +10,7 @@ import (
 )
 
 type Teamwork interface {
-	Reginster(name string, habdle func() error) TeamworkClose
+	Reginster(name string, habdle func()) TeamworkClose
 	Start() error
 	Close()
 }
@@ -25,33 +25,35 @@ type TeamworkCloseStruct struct {
 
 type TeamworkStruct struct {
 	Ctx          context.Context
-	Handles      map[string]func() error
+	Handles      map[string]func()
 	HandlesClose []func()
 }
 
 func NewTeamwork() Teamwork {
 	return &TeamworkStruct{
-		Ctx: context.Background(),
+		Ctx:          context.Background(),
+		Handles:      make(map[string]func()),
+		HandlesClose: make([]func(), 0),
 	}
 }
 
-func (t *TeamworkStruct) Reginster(name string, handle func() error) TeamworkClose {
-	maps.Copy(t.Handles, map[string]func() error{name: handle})
+func (t *TeamworkStruct) Reginster(name string, handle func()) TeamworkClose {
+	maps.Copy(t.Handles, map[string]func(){name: handle})
 	return &TeamworkCloseStruct{
 		T: t,
 	}
 }
 
 func (t *TeamworkCloseStruct) HandleClose(handle func()) {
-	copy(t.T.HandlesClose, []func(){handle})
+	t.T.HandlesClose = append(t.T.HandlesClose, handle)
 }
 
 func (t *TeamworkStruct) Start() error {
 	stopChan := make(chan string)
 	// 假设我们要调用handlers这么多个服务
-	for _, f := range t.Handles {
+	for k, f := range t.Handles {
 		// 每个函数启动一个协程
-		go func(handler func() error) {
+		go func(handler func()) {
 			defer func() {
 				// 每个协程内部使用recover捕获可能在调用逻辑中发生的panic
 				if e := recover(); e != nil {
@@ -64,6 +66,7 @@ func (t *TeamworkStruct) Start() error {
 			// 取第一个报错的handler调用逻辑，并最终向外返回
 			handler()
 		}(f)
+		log.Println(k, "start: success")
 	}
 
 	err := <-stopChan
