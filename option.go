@@ -24,8 +24,8 @@ type (
 		Etcd  etcd.Etcd
 		Redis redis.Redis
 
-		Log    zap.Log
 		Config viper.Viper
+		Log    zap.Log
 
 		Teamwork teamwork.Teamwork
 
@@ -54,6 +54,9 @@ func newOptions(opts ...Option) Options {
 
 	if opt.Log == nil {
 		opt.Log = zap.NewZap(opt.Config.Data.Log)
+	}
+	if opt.Teamwork == nil {
+		opt.Teamwork = teamwork.NewTeamwork()
 	}
 
 	return opt
@@ -107,5 +110,17 @@ func Redis(r *redis.Config) Option {
 			panic("redis error " + err.Error())
 		}
 		options.Redis = rds
+	}
+}
+
+func Http(r *web.Gin) Option {
+	return func(options *Options) {
+		options.Web = r
+	}
+}
+
+func Rpc(r rpc.Rpc) Option {
+	return func(options *Options) {
+		options.Rpc = r
 	}
 }
