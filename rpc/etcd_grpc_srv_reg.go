@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 	"log"
-	"os"
 	"strconv"
 
 	etcdClientV3 "go.etcd.io/etcd/client/v3"
@@ -66,8 +65,7 @@ func (s *ServiceRegister) ListenLeaseRespChan() {
 		_ = leaseKeepResp
 		// log.Println("续约成功", leaseKeepResp)
 	}
-	log.Println("lease close")
-	os.Exit(0)
+	panic("lease close")
 }
 
 // Close 注销服务

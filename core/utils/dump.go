@@ -7,19 +7,13 @@ import (
 	"unsafe"
 )
 
-func If(condition bool, trueVal, falseVal interface{}) interface{} {
-	if condition {
-		return trueVal
-	}
-	return falseVal
-}
-
-// IsLittleEndian determines whether the host byte order is little endian
+// IsLittleEndian 决定主机字节顺序是否为小端序
 func IsLittleEndian() bool {
 	n := 0x1234
 	return *(*byte)(unsafe.Pointer(&n)) == 0x34
 }
 
+// IsInterfaceNil 判读接口是否为Nil
 func IsInterfaceNil(i interface{}) bool {
 	vi := reflect.ValueOf(i)
 	if vi.Kind() == reflect.Ptr {

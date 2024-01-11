@@ -1,11 +1,13 @@
 package utils
 
 import (
-	"fmt"
+	"errors"
+	"log"
+	"runtime/debug"
 	"sync"
 )
 
-// GoPanic 并发调用服务，每个handler都会传入一个调用逻辑函数
+// GoPanic 并发调用服务，每个handler执行完后响应
 func GoPanic(handlers ...func() error) (err error) {
 
 	var wg sync.WaitGroup
@@ -15,12 +17,12 @@ func GoPanic(handlers ...func() error) (err error) {
 		wg.Add(1)
 		// 每个函数启动一个协程
 		go func(handler func() error) {
-
 			defer func() {
 				// 每个协程内部使用recover捕获可能在调用逻辑中发生的panic
 				if e := recover(); e != nil {
 					// 某个服务调用协程报错，可以在这里打印一些错误日志
-					fmt.Println("并发执行错误")
+					log.Println(e)
+					debug.PrintStack()
 				}
 				wg.Done()
 			}()
@@ -35,4 +37,29 @@ func GoPanic(handlers ...func() error) (err error) {
 
 	wg.Wait()
 	return
+}
+
+// GoPanicShutdown 并发调用服务，只要一个 handler panic 程序 shutdown
+func GoPanicShutdown(handlers ...func() error) error {
+	stopChan := make(chan string)
+	// 假设我们要调用handlers这么多个服务
+	for _, f := range handlers {
+		// 每个函数启动一个协程
+		go func(handler func() error) {
+			defer func() {
+				// 每个协程内部使用recover捕获可能在调用逻辑中发生的panic
+				if e := recover(); e != nil {
+					log.Println(e)
+					//打印错误堆栈信息
+					debug.PrintStack()
+				}
+				stopChan <- "panic shutdown"
+			}()
+			// 取第一个报错的handler调用逻辑，并最终向外返回
+			handler()
+		}(f)
+	}
+
+	t := <-stopChan
+	return errors.New(t)
 }

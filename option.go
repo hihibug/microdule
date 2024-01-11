@@ -2,14 +2,16 @@ package microdule
 
 import (
 	"context"
+	"reflect"
+
 	"github.com/hihibug/microdule/core/etcd"
 	"github.com/hihibug/microdule/core/gorm"
 	"github.com/hihibug/microdule/core/redis"
 	"github.com/hihibug/microdule/core/viper"
 	"github.com/hihibug/microdule/core/zap"
 	"github.com/hihibug/microdule/rpc"
+	"github.com/hihibug/microdule/teamwork"
 	"github.com/hihibug/microdule/web"
-	"reflect"
 )
 
 type (
@@ -24,6 +26,8 @@ type (
 
 		Log    zap.Log
 		Config viper.Viper
+
+		Teamwork teamwork.Teamwork
 
 		Web *web.Gin
 		Rpc rpc.Rpc
