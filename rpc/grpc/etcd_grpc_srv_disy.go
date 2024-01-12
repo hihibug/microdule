@@ -1,14 +1,15 @@
-package rpc
+package grpc
 
 import (
 	"context"
 	"fmt"
+	"sync"
+
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/resolver"
-	"sync"
 )
 
 type EtcdResolverBuilder struct {

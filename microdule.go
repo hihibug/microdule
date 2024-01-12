@@ -1,20 +1,11 @@
 package microdule
 
-import (
-	"github.com/hihibug/microdule/rpc"
-	"github.com/hihibug/microdule/web"
-	"google.golang.org/grpc"
-)
-
 type Service interface {
 	Name() string
 	Init(...Option)
 	Options() *Options
-	Http() web.Web
-	Rpc(...grpc.ServerOption) rpc.Rpc
 	Close()
 	Run() error
-	Stop()
 }
 
 func NewService(opt ...Option) Service {
@@ -49,22 +40,22 @@ func (s *service) Close() {
 		s.opts.Etcd.Close()
 	}
 
-	return
+	s.opts.Teamwork.Close()
 }
 
-func (s *service) Run() error {
-	//fmt.Println(s)
-	return nil
-}
+func (s *service) Start() error {
 
-func (s *service) Http() web.Web {
-	return web.NewGin(s.opts.Config.Data.Http)
-}
+	if s.opts.Http != nil {
+		s.opts.Teamwork.Reginster("http", func() {
+			s.opts.Http.Run()
+		})
+	}
 
-func (s *service) Rpc(opt ...grpc.ServerOption) rpc.Rpc {
-	return rpc.NewGrpc(s.opts.Config.Data.Rpc, opt...)
-}
+	if s.opts.Rpc != nil {
+		s.opts.Teamwork.Reginster("rpc ", func() {
+			s.opts.Rpc.Run()
+		})
+	}
 
-func (s *service) Stop() {
-
+	return s.opts.Teamwork.Start()
 }

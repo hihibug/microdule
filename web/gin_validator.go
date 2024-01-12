@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/zh"

@@ -1,22 +1,18 @@
 package web
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/hihibug/microdule/core/middleware"
-	"github.com/hihibug/microdule/core/utils"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/hihibug/microdule/core/middleware"
+	"github.com/hihibug/microdule/core/utils"
 )
 
-type Gin struct {
-	Route  *gin.Engine
-	Config *Config
-}
-
-func NewGin(conf *Config) *Gin {
+func NewGin(conf *Config) Web {
 	gin.SetMode(conf.Mode)
 
 	if !conf.LogColType {
@@ -55,7 +51,7 @@ func NewGin(conf *Config) *Gin {
 	}
 }
 
-func (g *Gin) Client() *Gin {
+func (g *Gin) Client() any {
 	return g
 }
 

@@ -2,16 +2,12 @@ package rpc
 
 import (
 	"fmt"
+	"net"
+
+	grpcs "github.com/hihibug/microdule/rpc/grpc"
 	etcdClientV3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
-	"net"
 )
-
-type Grpc struct {
-	RpcSrv       *grpc.Server
-	Config       *Config
-	EtcdRegister *ServiceRegister
-}
 
 func NewGrpc(c *Config, opt ...grpc.ServerOption) Rpc {
 	grpcServer := grpc.NewServer(opt...)
@@ -22,12 +18,12 @@ func NewGrpc(c *Config, opt ...grpc.ServerOption) Rpc {
 	}
 }
 
-func (g *Grpc) Client() *Grpc {
+func (g *Grpc) Client() any {
 	return g
 }
 
-func (g *Grpc) Register(etcd *etcdClientV3.Client) (*ServiceRegister, error) {
-	return NewRpcServiceRegister(etcd,
+func (g *Grpc) Register(etcd *etcdClientV3.Client) (*grpcs.ServiceRegister, error) {
+	return grpcs.NewRpcServiceRegister(etcd,
 		g.Config.Name,
 		fmt.Sprint(g.Config.IP, ":", g.Config.Addr),
 		5,
@@ -40,12 +36,15 @@ func (g *Grpc) Run() error {
 
 	lis, err := net.Listen("tcp", address)
 
+	defer g.EtcdRegister.Close()
+
 	if err != nil {
 		panic("grpc net listen error :" + err.Error())
 	}
 
-	err = g.RpcSrv.Serve(lis)
+	go g.EtcdRegister.ListenLeaseRespChan()
 
+	err = g.RpcSrv.Serve(lis)
 	if err != nil {
 		return err
 	}

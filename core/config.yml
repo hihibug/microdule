@@ -18,7 +18,7 @@ QiNu:
   
 # etcd configuration
 etcd:
-  addr: '172.16.102.109:2379,172.16.102.109:2380'
+  addr: '172.16.102.111:2379,172.16.102.111:2380'
   password : ''
   time-out : 5
 

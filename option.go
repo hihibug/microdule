@@ -18,19 +18,16 @@ type (
 	Option func(*Options)
 
 	Options struct {
-		Name string
-
 		Gorm  gorm.Gorm
 		Etcd  etcd.Etcd
 		Redis redis.Redis
 
-		Config viper.Viper
-		Log    zap.Log
-
+		Name     string
+		Config   viper.Viper
+		Log      zap.Log
+		Http     web.Web
+		Rpc      rpc.Rpc
 		Teamwork teamwork.Teamwork
-
-		Web *web.Gin
-		Rpc rpc.Rpc
 
 		Context context.Context
 	}
@@ -115,7 +112,7 @@ func Redis(r *redis.Config) Option {
 
 func Http(r *web.Gin) Option {
 	return func(options *Options) {
-		options.Web = r
+		options.Http = r
 	}
 }
 

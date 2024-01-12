@@ -1,4 +1,4 @@
-package rpc
+package grpc
 
 import (
 	"context"
@@ -10,6 +10,8 @@ import (
 
 //ServiceRegister 创建租约注册服务
 type ServiceRegister struct {
+	Ctx           context.Context
+	CtxCance      context.CancelFunc
 	cli           *etcdClientV3.Client                        //etcd client
 	leaseID       etcdClientV3.LeaseID                        //租约ID
 	keepAliveChan <-chan *etcdClientV3.LeaseKeepAliveResponse //租约keepalieve相应chan
@@ -19,10 +21,13 @@ type ServiceRegister struct {
 
 // NewRpcServiceRegister 新建注册服务
 func NewRpcServiceRegister(etcd *etcdClientV3.Client, key, val string, lease int64) (*ServiceRegister, error) {
+	ctx, cance := context.WithCancel(context.Background())
 	ser := &ServiceRegister{
-		cli: etcd,
-		key: key,
-		val: val,
+		cli:      etcd,
+		key:      key,
+		val:      val,
+		Ctx:      ctx,
+		CtxCance: cance,
 	}
 
 	//申请租约设置时间keepalive并注册服务
@@ -65,7 +70,13 @@ func (s *ServiceRegister) ListenLeaseRespChan() {
 		_ = leaseKeepResp
 		// log.Println("续约成功", leaseKeepResp)
 	}
-	panic("lease close")
+	select {
+	case <-s.Ctx.Done():
+		// log.Println("grpc listen close :", s.leaseID)
+	default:
+		panic("lease panic close")
+	}
+
 }
 
 // Close 注销服务
@@ -74,6 +85,7 @@ func (s *ServiceRegister) Close() error {
 	if _, err := s.cli.Revoke(context.Background(), s.leaseID); err != nil {
 		return err
 	}
-	log.Println("grpc close :", s.leaseID)
+	s.CtxCance()
+	// log.Println("grpc close :", s.leaseID)
 	return s.cli.Close()
 }

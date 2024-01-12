@@ -1,11 +1,14 @@
 package microdule
 
 import (
-	"fmt"
 	"log"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/hihibug/microdule/rpc"
+
+	"github.com/hihibug/microdule/core/utils"
 )
 
 var global *Options
@@ -19,7 +22,7 @@ func TestNewService(t *testing.T) {
 
 	global = s.Options()
 
-	fmt.Println(global.Config.Vp.Get("QiNu.Key"))
+	// fmt.Println(global.Config.Vp.Get("QiNu.Key"))
 	////NewZapWriter 对log.New函数的再次封装，从而实现是否通过zap打印日志
 	//gormConf := gorm.GetGormConfigStruct()
 	//gorm.LogGorm(
@@ -32,11 +35,11 @@ func TestNewService(t *testing.T) {
 	//global.Config.Data.Etcd.Log = global.Log.Client()
 	//
 	////初始化组件
-	//s.Init(
-	////Redis(nil),
-	////Gorm(global.Config.ConfigToGormMysql(gorm.SetGormConfig(gormConf))),
-	////Etcd(global.Config.Data.Etcd),
-	//)
+	s.Init(
+		//Redis(nil),
+		//Gorm(global.Config.ConfigToGormMysql(gorm.SetGormConfig(gormConf))),
+		Etcd(global.Config.Data.Etcd),
+	)
 	//
 	////关闭链接
 	//defer s.Close()
@@ -55,16 +58,25 @@ func TestNewService(t *testing.T) {
 	//	})
 	//}
 
-	//ip, _ := utils.ExternalIP()
-	//global.Config.Data.Rpc.IP = ip
-	//rpc := s.Rpc().Client()
+	ip, _ := utils.ExternalIP()
+	global.Config.Data.Rpc.IP = ip
+	grpcData := rpc.NewGrpc(global.Config.Data.Rpc)
+	// config.RegisterGrpc(grpcData.Client().RpcSrv)
+
+	register, err := grpcData.Register(global.Etcd.Clients())
+	if err != nil {
+		panic(err)
+	}
+	grpcData.Client().(*rpc.Grpc).EtcdRegister = register
+	s.Init(Rpc(grpcData))
+	// rpc := s.Rpc().Client().Grpc
 	//register, err := s.Rpc().Client().Register(global.Etcd.Clients())
 	//if err != nil {
 	//	os.Exit(0)
 	//}
 	//go register.ListenLeaseRespChan()
 	//
-	//rpc.Run()
+	grpcData.Run()
 	//rest.Run()
 }
 
