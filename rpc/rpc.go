@@ -10,6 +10,7 @@ type Rpc interface {
 	Client() any
 	Register(*etcdClientV3.Client) (*grpcs.ServiceRegister, error)
 	Run() error
+	Close()
 }
 
 type Grpc struct {

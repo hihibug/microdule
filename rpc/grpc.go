@@ -51,3 +51,7 @@ func (g *Grpc) Run() error {
 
 	return nil
 }
+
+func (g *Grpc) Close() {
+	g.EtcdRegister.Close()
+}
