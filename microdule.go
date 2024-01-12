@@ -28,6 +28,8 @@ func (s *service) Options() *Options {
 
 func (s *service) Close() {
 
+	s.opts.Teamwork.Close()
+
 	if s.opts.Rpc != nil {
 		s.opts.Rpc.Close()
 	}
@@ -43,8 +45,6 @@ func (s *service) Close() {
 	if s.opts.Etcd != nil {
 		s.opts.Etcd.Close()
 	}
-
-	s.opts.Teamwork.Close()
 }
 
 func (s *service) Start() error {
