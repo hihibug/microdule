@@ -28,6 +28,10 @@ func (s *service) Options() *Options {
 
 func (s *service) Close() {
 
+	if s.opts.Rpc != nil {
+		s.opts.Rpc.Close()
+	}
+
 	if s.opts.Gorm != nil {
 		s.opts.Gorm.Close()
 	}
@@ -40,15 +44,10 @@ func (s *service) Close() {
 		s.opts.Etcd.Close()
 	}
 
-	if s.opts.Rpc != nil {
-		s.opts.Rpc.Close()
-	}
-
 	s.opts.Teamwork.Close()
 }
 
 func (s *service) Start() error {
-
 	if s.opts.Http != nil {
 		s.opts.Teamwork.Reginster("http", func() {
 			s.opts.Http.Run()
