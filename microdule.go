@@ -5,7 +5,7 @@ type Service interface {
 	Init(...Option)
 	Options() *Options
 	Close()
-	Run() error
+	Start() error
 }
 
 func NewService(opt ...Option) Service {
