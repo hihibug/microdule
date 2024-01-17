@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"runtime/debug"
 	"sync"
@@ -39,26 +40,31 @@ func GoPanic(handlers ...func() error) (err error) {
 	return
 }
 
-// GoPanicShutdown 并发调用服务，只要一个 handler panic 程序 shutdown
-func GoPanicShutdown(handlers ...func() error) error {
+// GoPanicToError 并发调用服务，只要一个 handler panic 程序 shutdown
+func GoPanicToError(handlers func() error) error {
 	stopChan := make(chan string)
 	// 假设我们要调用handlers这么多个服务
-	for _, f := range handlers {
-		// 每个函数启动一个协程
-		go func(handler func() error) {
-			defer func() {
-				// 每个协程内部使用recover捕获可能在调用逻辑中发生的panic
-				if e := recover(); e != nil {
-					log.Println(e)
-					//打印错误堆栈信息
-					debug.PrintStack()
-				}
-				stopChan <- "panic shutdown"
-			}()
-			// 取第一个报错的handler调用逻辑，并最终向外返回
-			handler()
-		}(f)
-	}
+	// for _, f := range handlers {
+	// 每个函数启动一个协程
+	go func(handler func() error) {
+		defer func() {
+			// 每个协程内部使用recover捕获可能在调用逻辑中发生的panic
+			e := recover()
+			if e != nil {
+				log.Println(e)
+				//打印错误堆栈信息
+				debug.PrintStack()
+				stopChan <- fmt.Sprintf("%s", e)
+			}
+
+		}()
+		// 取第一个报错的handler调用逻辑，并最终向外返回
+		err := handler()
+		if err != nil {
+			stopChan <- err.Error()
+		}
+	}(handlers)
+	// }
 
 	t := <-stopChan
 	return errors.New(t)

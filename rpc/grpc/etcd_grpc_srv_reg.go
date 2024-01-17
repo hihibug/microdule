@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"errors"
 	"log"
 	"strconv"
 
@@ -65,18 +66,19 @@ func (s *ServiceRegister) putKeyWithLease(lease int64) error {
 }
 
 //ListenLeaseRespChan 监听 续租情况
-func (s *ServiceRegister) ListenLeaseRespChan() {
+func (s *ServiceRegister) ListenLeaseRespChan() error {
 	for leaseKeepResp := range s.keepAliveChan {
 		_ = leaseKeepResp
 		// log.Println("续约成功", leaseKeepResp)
 	}
+
 	select {
 	case <-s.Ctx.Done():
 		// log.Println("grpc listen close :", s.leaseID)
+		return nil
 	default:
-		panic("lease panic close")
+		return errors.New("lease close")
 	}
-
 }
 
 // Close 注销服务

@@ -36,13 +36,9 @@ func (g *Grpc) Run() error {
 
 	lis, err := net.Listen("tcp", address)
 
-	defer g.EtcdRegister.Close()
-
 	if err != nil {
 		panic("grpc net listen error :" + err.Error())
 	}
-
-	go g.EtcdRegister.ListenLeaseRespChan()
 
 	err = g.RpcSrv.Serve(lis)
 	if err != nil {
